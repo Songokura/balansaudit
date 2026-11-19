@@ -197,7 +197,7 @@
   }
 
   /* ============ ЗАЛ ДОКУМЕНТОВ ============ */
-  var hall = $('.hall'), pin = $('.hall-pin'), heroCopy = $('.hero-copy');
+  var hall = $('.hall'), pin = $('.hall-pin');
   var stops = $$('.stop');
   var movers = stops.map(function (s) { return $('.mover', s); });
   var rail = $('#rail'), railLinks = $$('#rail a');
@@ -216,15 +216,14 @@
     if (mqDesk.matches) {
       unit = Math.round(vh * 0.85);
       hall.style.setProperty('--unit', unit + 'px');
-      hall.style.height = (vh + (LAST + TAIL) * unit) + 'px';
-      hallTop = hall.offsetTop;
-      anchorDocs.style.top = (unit + hdrH()) + 'px';
+      hall.style.height = (vh + (LAST - 1 + TAIL) * unit) + 'px';
+      hallTop = hall.offsetTop - unit;
+      anchorDocs.style.top = hdrH() + 'px';
     } else {
       hall.style.height = '';
       stops.forEach(function (s, i) {
         s.style.zIndex = ''; movers[i].style.cssText = '';
       });
-      heroCopy.style.cssText = '';
       var hh = $('.hall-head');
       anchorDocs.style.top = (hh.offsetTop - 10) + 'px';
       lazyStops();
@@ -305,14 +304,7 @@
       if (d < 1.4) upgrade(stops[i]);
     }
 
-    /* текст первого экрана */
-    var ho = 1 - clamp(p * 2.6, 0, 1);
-    heroCopy.style.opacity = ho.toFixed(3);
-    heroCopy.style.transform = 'translateY(calc(-50% - ' + (p * 90).toFixed(1) + 'px))';
-    heroCopy.style.visibility = ho <= 0.01 ? 'hidden' : '';
-    hall.style.setProperty('--hero', clamp(1 - p * 3, 0, 1).toFixed(3));
-
-    var nowDocs = p >= 0.5;
+    var nowDocs = p >= 0.35;
     var a = nowDocs ? clamp(Math.round(q), 0, stops.length - 1) : -1;
     if (nowDocs !== inDocs) { inDocs = nowDocs; hall.classList.toggle('in-docs', inDocs); }
     if (a !== activeStop) {
@@ -327,7 +319,7 @@
     if (!mqDesk.matches) return;
     var y = window.scrollY;
     var lettersTop = lettersSec.offsetTop, lettersBottom = lettersTop + lettersSec.offsetHeight;
-    var show = y < lettersBottom - vh * 0.75;
+    var show = y > hall.offsetTop - vh * 0.5 && y < lettersBottom - vh * 0.75;
     rail.classList.toggle('show', show);
     var idx;
     if (y > lettersTop - vh * 0.55) idx = 4;
@@ -744,7 +736,7 @@
   }
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('a[href^="#"]');
-    if (!a || a.closest('#rail')) return;
+    if (!a || a.closest('#rail') || a.hasAttribute('data-goto')) return;
     var id = a.getAttribute('href').slice(1);
     var y = anchorY(id);
     if (y == null) return;
@@ -907,9 +899,132 @@
       .from(hs.lines, { yPercent: 108, duration: 1.2, ease: E, stagger: 0.09, onComplete: function () { var i = splits.indexOf(hs); if (i > -1) { splits.splice(i, 1); hs.revert(); } } }, 0.15)
       .from('.hero-copy .lead', { opacity: 0, y: 24, duration: 0.9, ease: E }, 0.65)
       .from('.hero-copy .cta .btn', { opacity: 0, y: 20, duration: 0.8, ease: E, stagger: 0.09 }, 0.8)
-      .to(scene, { intro: 0, duration: 2, ease: 'expo.out' }, 0.1)
-      .from('.hero-tag', { opacity: 0, duration: 0.8, clearProps: 'opacity' }, 1.5);
+      .from('.hero-scene', { opacity: 0, y: 40, duration: 1.4, ease: E }, 0.2)
+      .from('.proofs li', { opacity: 0, y: 16, duration: 0.8, ease: E, stagger: 0.07 }, 0.9);
+    /* листы зала въезжают, когда зал подходит к окну */
+    ScrollTrigger.create({ trigger: hall, start: 'top 95%', once: true, onEnter: function () { gsap.to(scene, { intro: 0, duration: 2.2, ease: 'expo.out' }); } });
   }
+
+
+  /* ============ ПЕРВЫЙ ЭКРАН: БАЛАНС СХОДИТСЯ ============ */
+  (function heroLedger() {
+    var L = $('#ledger'); if (!L) return;
+    var heroSec = $('.hero'), stage = $('.ledger-stage');
+    var rowsA = $$('.lg-a .lg-row:not(.lg-total)', L), rowsP = $$('.lg-p .lg-row:not(.lg-total)', L);
+    var totA = $('.lg-a .lg-total', L), totP = $('.lg-p .lg-total', L);
+    var sweep = $('.lg-sweep', L), delta = $('.lg-delta', L);
+    var BAD = 3;
+    function fmt(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+    function val(row) { return $('.lg-v', row); }
+    function setV(el, n) { el.textContent = fmt(n); el.dataset.cur = n; }
+    function roll(el, to, dur) {
+      return new Promise(function (res) {
+        var from = +el.dataset.cur || +el.dataset.start, t0 = performance.now();
+        (function f(now) {
+          var k = clamp((now - t0) / dur, 0, 1), e = 1 - Math.pow(1 - k, 3);
+          setV(el, from + (to - from) * e);
+          if (k < 1) requestAnimationFrame(f); else res();
+        })(t0);
+      });
+    }
+    var visible = true;
+    function wait(ms) {
+      return new Promise(function (res) {
+        var left = ms, last = performance.now();
+        (function f(now) {
+          if (visible) left -= now - last;
+          last = now;
+          if (left <= 0) res(); else requestAnimationFrame(f);
+        })(last);
+      });
+    }
+    function moveSweep(row) {
+      sweep.style.height = row.offsetHeight + 'px';
+      sweep.style.transform = 'translate3d(0,' + row.offsetTop + 'px,0)';
+      L.classList.add('sweeping');
+    }
+    function reset() {
+      L.classList.remove('sweeping', 'done', 'bad');
+      $$('.lg-row', L).forEach(function (r) { r.classList.remove('ok', 'flag', 'match'); });
+      $$('.lg-v', L).forEach(function (v) { setV(v, +v.dataset.start); });
+      delta.classList.remove('on');
+    }
+    function finalState() {
+      $$('.lg-row', L).forEach(function (r) { r.classList.add('ok'); });
+      $$('.lg-v', L).forEach(function (v) { setV(v, +v.dataset.v); });
+      totA.classList.add('match'); totP.classList.add('match'); L.classList.add('done');
+    }
+    $$('.lg-v', L).forEach(function (v) { v.dataset.cur = v.dataset.start; });
+    if (reduce) { finalState(); return; }
+
+    function step(i) {
+      if (i >= rowsA.length) return finish();
+      if (!rowsA[i].offsetParent) { rowsA[i].classList.add('ok'); rowsP[i].classList.add('ok'); return step(i + 1); }
+      moveSweep(rowsA[i]);
+      return wait(520).then(function () {
+        rowsA[i].classList.add('ok');
+        if (i !== BAD) return null;
+        var r = rowsP[i];
+        r.classList.add('flag');
+        delta.style.transform = 'translate3d(0,' + (r.offsetTop + r.offsetHeight / 2) + 'px,0)';
+        delta.classList.add('on');
+        return wait(1150)
+          .then(function () { return Promise.all([roll(val(r), +val(r).dataset.v, 900), roll(val(totP), +val(totP).dataset.v, 900)]); })
+          .then(function () { delta.classList.remove('on'); r.classList.remove('flag'); return wait(160); });
+      }).then(function () {
+        rowsP[i].classList.add('ok');
+        return wait(260);
+      }).then(function () { return step(i + 1); });
+    }
+    function finish() {
+      moveSweep(totA);
+      return wait(520).then(function () {
+        totA.classList.add('match'); totP.classList.add('match');
+        L.classList.remove('bad'); L.classList.add('done');
+        return wait(700);
+      }).then(function () { L.classList.remove('sweeping'); return wait(4600); })
+        .then(function () { L.classList.add('fade'); return wait(600); })
+        .then(function () { reset(); L.classList.remove('fade'); return wait(900); });
+    }
+    function cycle() { L.classList.add('bad'); return step(0).then(cycle); }
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (en) {
+        visible = en[0].isIntersecting;
+        heroSec.classList.toggle('paused', !visible);
+      }).observe(heroSec);
+    }
+    wait(1300).then(cycle);
+
+    /* наклон листа за курсором и уход по прокрутке (мышь, десктоп) */
+    if (canHover) {
+      var mx = 0, my = 0, tx = 0, ty = 0, raf = 0;
+      var tilt = function () {
+        mx += (tx - mx) * 0.08; my += (ty - my) * 0.08;
+        stage.style.setProperty('--mx', mx.toFixed(3)); stage.style.setProperty('--my', my.toFixed(3));
+        raf = (Math.abs(tx - mx) > 0.002 || Math.abs(ty - my) > 0.002) ? requestAnimationFrame(tilt) : 0;
+      };
+      heroSec.addEventListener('mousemove', function (e) {
+        tx = (e.clientX / window.innerWidth) * 2 - 1; ty = (e.clientY / window.innerHeight) * 2 - 1;
+        if (!raf) raf = requestAnimationFrame(tilt);
+      });
+      heroSec.addEventListener('mouseleave', function () { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(tilt); });
+    }
+    if (hasGsap && mqDesk.matches) {
+      gsap.fromTo(stage, { '--sp': 0 }, { '--sp': 1, ease: 'none', scrollTrigger: { trigger: heroSec, start: 'top top', end: 'bottom top', scrub: true } });
+    }
+  })();
+
+  /* подтверждения под листом ведут к нужному документу */
+  $$('.proofs a[data-goto]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var k = +a.getAttribute('data-goto');
+      if (k === 4) { scrollToY(lettersSec.offsetTop - hdrH() + 2); return; }
+      if (mqDesk.matches) { scrollToY(yForP(k + 1)); return; }
+      var st = stops[k]; if (st) scrollToY(st.getBoundingClientRect().top + window.scrollY - hdrH() - 8);
+    });
+  });
 
   /* ============ СТАРТ ============ */
   layoutHall();

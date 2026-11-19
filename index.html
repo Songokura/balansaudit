@@ -77,7 +77,7 @@
   }
 }
 </script>
-<link rel="stylesheet" href="styles.css?v=20261119-9">
+<link rel="stylesheet" href="styles.css?v=20261119-10">
 <script src="https://lead-bot.sultan-askarov-kz.workers.dev/t.js" data-site="balansaudit" defer></script>
 </head>
 <body>
@@ -140,21 +140,15 @@
 
 <main>
 
-<!-- Зал документов: первый экран и проход по документам - одна сцена -->
-<section class="hall" id="top" data-dark>
-  <span class="anchor" id="dokumenty" data-p="1"></span>
-  <div class="hall-pin">
-    <div class="hall-bg" aria-hidden="true">
-      <div class="bg-glow"></div>
-      <div class="bg-rosette"><svg class="guilloche" data-g="rosette" viewBox="-500 -500 1000 1000"></svg></div>
-      <div class="bg-rosette bg-rosette-2"><svg class="guilloche" data-g="rosette2" viewBox="-500 -500 1000 1000"></svg></div>
-      <div class="bg-beam"></div>
-      <div class="bg-floor"></div>
-      <div class="bg-dust"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="bg-grain"></div>
-    </div>
-
-    <div class="hero-scr">
+<!-- Первый экран: баланс сходится -->
+<section class="hero" id="top" data-dark>
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hb-glow"></div>
+    <div class="hb-lines"></div>
+    <div class="bg-rosette hb-rosette"><svg class="guilloche" data-g="rosette2" viewBox="-500 -500 1000 1000"></svg></div>
+    <div class="bg-grain"></div>
+  </div>
+  <div class="hero-in">
     <div class="hero-copy">
       <p class="kicker"><i></i><span data-i18n="hero.kicker">Уральск&nbsp;· аудит и бухгалтерский учёт&nbsp;· по всему Казахстану</span></p>
       <h1 class="display" data-i18n="hero.h1" data-split>Аудит финансовой отчётности. Все разрешительные документы&nbsp;- на этой странице</h1>
@@ -165,14 +159,60 @@
       </div>
     </div>
 
-    <button class="hero-m" type="button" data-open="license" data-title-key="s1.h" aria-label="Открыть лицензию на аудиторскую деятельность">
-      <span class="fan" aria-hidden="true">
-        <span class="fan-sh f2"><img src="assets/docs/thumb/union-ru.webp" alt="" width="396" height="560" decoding="async"></span>
-        <span class="fan-sh f3"><img src="assets/docs/thumb/auditor-kabdulova.webp" alt="" width="560" height="396" decoding="async"></span>
-        <span class="fan-sh f1"><img src="assets/docs/thumb/license.webp" alt="" width="486" height="560" fetchpriority="high" decoding="async"><span class="glint"></span></span>
-      </span>
-      <span class="hero-m-tag"><span data-i18n="hero.tag">Лицензия № 20005100 от 18.03.2020</span><svg width="16" height="16"><use href="#ic-zoom"/></svg></span>
-    </button>
+    <div class="hero-scene" aria-hidden="true">
+      <div class="ledger-stage">
+        <div class="ledger-ghost lg-g2"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="ledger-ghost lg-g1"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="bsheet" id="ledger">
+          <div class="lg-head"><p class="lg-title" data-i18n="lg.title">Бухгалтерский баланс</p><p class="lg-note" data-i18n="lg.note">Условный пример, тыс.&nbsp;тг</p></div>
+          <div class="lg-cols">
+        <div class="lg-col lg-a">
+          <p class="lg-ch" data-i18n="lg.a">Актив</p>
+          <div class="lg-row" data-r="1"><span class="lg-n" data-i18n="lg.a1">Денежные средства</span><span class="lg-v" data-v="18450" data-start="18450">18&nbsp;450</span><svg class="lg-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></div>
+          <div class="lg-row" data-r="2"><span class="lg-n" data-i18n="lg.a2">Дебиторская задолженность</span><span class="lg-v" data-v="42310" data-start="42310">42&nbsp;310</span><svg class="lg-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></div>
+          <div class="lg-row" data-r="3"><span class="lg-n" data-i18n="lg.a3">Запасы</span><span class="lg-v" data-v="36780" data-start="36780">36&nbsp;780</span><svg class="lg-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></div>
+          <div class="lg-row" data-r="4"><span class="lg-n" data-i18n="lg.a4">Основные средства</span><span class="lg-v" data-v="79260" data-start="79260">79&nbsp;260</span><svg class="lg-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></div>
+          <div class="lg-row" data-r="5"><span class="lg-n" data-i18n="lg.a5">Нематериальные активы</span><span class="lg-v" data-v="7820" data-start="7820">7&nbsp;820</span><svg class="lg-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></div>
+          <div class="lg-row lg-total"><span class="lg-n" data-i18n="lg.ta">Итого</span><span class="lg-v" data-v="184620" data-start="184620">184&nbsp;620</span></div>
+        </div>
+        <div class="lg-eq"><svg viewBox="0 0 40 40"><path class="eq-1" d="M9 15h22"/><path class="eq-2" d="M9 25h22"/><path class="eq-x" d="M27 8 13 32"/></svg></div>
+        <div class="lg-col lg-p">
+          <p class="lg-ch" data-i18n="lg.p">Капитал и обязательства</p>
+          <div class="lg-row" data-r="1"><span class="lg-n" data-i18n="lg.p1">Уставный капитал</span><span class="lg-v" data-v="20000" data-start="20000">20&nbsp;000</span><svg class="lg-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></div>
+          <div class="lg-row" data-r="2"><span class="lg-n" data-i18n="lg.p2">Нераспределённая прибыль</span><span class="lg-v" data-v="61940" data-start="61940">61&nbsp;940</span><svg class="lg-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></div>
+          <div class="lg-row" data-r="3"><span class="lg-n" data-i18n="lg.p3">Кредиты банков</span><span class="lg-v" data-v="48500" data-start="48500">48&nbsp;500</span><svg class="lg-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></div>
+          <div class="lg-row" data-r="4"><span class="lg-n" data-i18n="lg.p4">Кредиторская задолженность</span><span class="lg-v" data-v="39130" data-start="38450">38&nbsp;450</span><svg class="lg-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></div>
+          <div class="lg-row" data-r="5"><span class="lg-n" data-i18n="lg.p5">Налоговые обязательства</span><span class="lg-v" data-v="15050" data-start="15050">15&nbsp;050</span><svg class="lg-tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></div>
+          <div class="lg-row lg-total"><span class="lg-n" data-i18n="lg.tp">Итого</span><span class="lg-v" data-v="184620" data-start="183940">183&nbsp;940</span></div>
+        </div>
+          </div>
+          <div class="lg-sweep"></div>
+          <span class="lg-delta">&minus;680</span>
+        </div>
+      </div>
+    </div>
+
+    <ul class="proofs">
+      <li><a href="#dokumenty" data-goto="0"><img src="assets/docs/thumb/license.webp" alt="" width="486" height="560" loading="lazy" decoding="async"><span><b data-i18n="pr.1h">Лицензия</b><i data-i18n="pr.1t">№&nbsp;20005100 от 18.03.2020</i></span></a></li>
+      <li><a href="#dokumenty" data-goto="1"><img src="assets/docs/thumb/union-ru.webp" alt="" width="396" height="560" loading="lazy" decoding="async"><span><b data-i18n="pr.2h">Союз аудиторов</b><i data-i18n="pr.2t">рег.&nbsp;№&nbsp;0117</i></span></a></li>
+      <li><a href="#dokumenty" data-goto="2"><img src="assets/docs/thumb/auditor-kabdulova.webp" alt="" width="560" height="396" loading="lazy" decoding="async"><span><b data-i18n="pr.3h">Два аудитора</b><i>МФ-0000982 · МФ-0000979</i></span></a></li>
+      <li><a href="#pisma" data-goto="4"><img src="assets/docs/thumb/letter-gasstroyproject-2026-11-18.webp" alt="" width="396" height="560" loading="lazy" decoding="async"><span><b data-i18n="pr.4h">Письма заказчиков</b><i data-i18n="pr.4t">Газстройпроект, ЭваВет</i></span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Зал документов: проход по документам -->
+<section class="hall" id="zal" data-dark>
+  <span class="anchor" id="dokumenty" data-p="1"></span>
+  <div class="hall-pin">
+    <div class="hall-bg" aria-hidden="true">
+      <div class="bg-glow"></div>
+      <div class="bg-rosette"><svg class="guilloche" data-g="rosette" viewBox="-500 -500 1000 1000"></svg></div>
+      <div class="bg-rosette bg-rosette-2"><svg class="guilloche" data-g="rosette2" viewBox="-500 -500 1000 1000"></svg></div>
+      <div class="bg-beam"></div>
+      <div class="bg-floor"></div>
+      <div class="bg-dust"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="bg-grain"></div>
     </div>
 
     <div class="hall-head">
@@ -194,7 +234,6 @@
               <span class="mark-box" style="left:29%;top:22.100%;width:62.800%;height:8.400%"><b class="chip chip-t" data-i18n="s1.c3">Лицензиат: ТОО «Баланс Аудит», БИН 200240041233</b></span>
               <span class="mark-box" style="left:29.300%;top:62%;width:62.300%;height:4.500%"><b class="chip chip-t" data-i18n="s1.c4">Лицензиар</b></span>
             </figure>
-            <p class="sheet-tag hero-tag" data-i18n="hero.tag">Лицензия № 20005100 от 18.03.2020</p>
           </div>
         </div>
         <div class="stop-cap">
@@ -274,7 +313,7 @@
 </section>
 
 <nav class="rail" id="rail" aria-label="Документы">
-  <a href="#top" data-rail="0"><span data-i18n="rail.1">Лицензия</span><i></i></a>
+  <a href="#dokumenty" data-rail="0"><span data-i18n="rail.1">Лицензия</span><i></i></a>
   <a href="#dokumenty" data-rail="1"><span data-i18n="rail.2">Союз аудиторов</span><i></i></a>
   <a href="#dokumenty" data-rail="2"><span data-i18n="rail.3">Аудиторы</span><i></i></a>
   <a href="#dokumenty" data-rail="3"><span data-i18n="rail.4">Повышение квалификации</span><i></i></a>
@@ -584,6 +623,6 @@
 <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
 <script src="assets/vendor/SplitText.min.js" defer></script>
 <script src="assets/vendor/lenis.min.js" defer></script>
-<script src="script.js?v=20261119-9" defer></script>
+<script src="script.js?v=20261119-10" defer></script>
 </body>
 </html>
