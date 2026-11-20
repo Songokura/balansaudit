@@ -185,7 +185,8 @@
 
   /* ============ ПЛАВНАЯ ПРОКРУТКА ============ */
   var lenis = null;
-  if (hasGsap && !reduce && window.Lenis) {
+  /* сглаживание нужно только колесу мыши; на тач-экранах прокрутка родная */
+  if (hasGsap && !reduce && canHover && window.Lenis) {
     lenis = new window.Lenis({ lerp: 0.1, wheelMultiplier: 1 });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(function (tm) { lenis.raf(tm * 1000); });
@@ -194,7 +195,7 @@
   function hdrH() { return $('#hdr').offsetHeight; }
   function scrollToY(y, instant) {
     if (lenis && !instant) lenis.scrollTo(y, { duration: 1.3 });
-    else window.scrollTo({ top: y, behavior: 'auto' });
+    else window.scrollTo({ top: y, behavior: instant || reduce ? 'auto' : 'smooth' });
   }
 
   /* ============ ЗАЛ ДОКУМЕНТОВ ============ */
