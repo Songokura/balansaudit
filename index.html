@@ -77,7 +77,7 @@
   }
 }
 </script>
-<link rel="stylesheet" href="styles.css?v=20261119-10">
+<link rel="stylesheet" href="styles.css?v=20261120-1">
 <script src="https://lead-bot.sultan-askarov-kz.workers.dev/t.js" data-site="balansaudit" defer></script>
 </head>
 <body>
@@ -202,7 +202,7 @@
 </section>
 
 <!-- Зал документов: проход по документам -->
-<section class="hall" id="zal" data-dark>
+<section class="hall" id="zal" data-dark aria-roledescription="carousel">
   <span class="anchor" id="dokumenty" data-p="1"></span>
   <div class="hall-pin">
     <div class="hall-bg" aria-hidden="true">
@@ -313,6 +313,11 @@
 </section>
 
 <nav class="rail" id="rail" aria-label="Документы">
+  <div class="rail-ctrl">
+    <button class="arr arr-prev" type="button" id="hallPrev" aria-label="Предыдущий документ"><svg width="18" height="18"><use href="#ic-arr"/></svg></button>
+    <button class="arr hall-play" type="button" id="hallPlay" aria-label="Пауза"><svg class="i-pause" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg><svg class="i-play" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.2v13.6L19 12z"/></svg></button>
+    <button class="arr" type="button" id="hallNext" aria-label="Следующий документ"><svg width="18" height="18"><use href="#ic-arr"/></svg></button>
+  </div>
   <a href="#dokumenty" data-rail="0"><span data-i18n="rail.1">Лицензия</span><i></i></a>
   <a href="#dokumenty" data-rail="1"><span data-i18n="rail.2">Союз аудиторов</span><i></i></a>
   <a href="#dokumenty" data-rail="2"><span data-i18n="rail.3">Аудиторы</span><i></i></a>
@@ -623,6 +628,6 @@
 <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
 <script src="assets/vendor/SplitText.min.js" defer></script>
 <script src="assets/vendor/lenis.min.js" defer></script>
-<script src="script.js?v=20261119-10" defer></script>
+<script src="script.js?v=20261120-1" defer></script>
 </body>
 </html>

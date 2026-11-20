@@ -143,6 +143,7 @@
     setWaLinks();
     renderDeckCap();
     renderLetter(curLetter, false);
+    hallLabels();
     if (hasGsap) ScrollTrigger.refresh();
   }
   function setLang(l, save) {
@@ -203,9 +204,8 @@
   var rail = $('#rail'), railLinks = $$('#rail a');
   var lettersSec = $('#pisma');
   var anchorDocs = $('#dokumenty');
-  var unit = 600, hallTop = 0, vw = 1440, vh = 900;
+  var vw = 1440, vh = 900;
   var LAST = stops.length;          /* остановок в сцене: p = 1..LAST */
-  var TAIL = 0.15;
   var scene = { intro: reduce ? 0 : 1, mx: 0, my: 0, tmx: 0, tmy: 0 };
   var flat = stops.map(function () { return { v: 0, t: 0 }; });
   var lastKey = '';
@@ -214,10 +214,7 @@
   function layoutHall() {
     vw = window.innerWidth; vh = window.innerHeight;
     if (mqDesk.matches) {
-      unit = Math.round(vh * 0.85);
-      hall.style.setProperty('--unit', unit + 'px');
-      hall.style.height = (vh + (LAST - 1 + TAIL) * unit) + 'px';
-      hallTop = hall.offsetTop - unit;
+      hall.style.height = '';
       anchorDocs.style.top = hdrH() + 'px';
     } else {
       hall.style.height = '';
@@ -230,13 +227,50 @@
     }
     lastKey = '';
   }
-  function pFromY(y) {
-    var r = clamp((y - hallTop) / unit, 0, LAST);
-    var k = Math.floor(r), f = r - k;
-    var tt = clamp((f - 0.14) / 0.72, 0, 1);
-    return k + tt * tt * (3 - 2 * tt);
+  /* слайдшоу по времени: p = номер остановки + 1, камера доезжает за ~1.1 с */
+  var SLIDE_MS = 7000;
+  var cur = 0, anim = { v: 1, from: 1, to: 1, t0: 0, dur: 0 };
+  var playing = !reduce, elapsed = 0, lastT = 0, ctrlHover = false;
+  var hallCtrl = { prev: $('#hallPrev'), next: $('#hallNext'), play: $('#hallPlay') };
+  function goTo(k) {
+    k = (k + LAST) % LAST;
+    elapsed = 0;
+    if (k === cur && anim.to === k + 1) return;
+    anim.from = anim.v; anim.to = k + 1; anim.t0 = performance.now();
+    anim.dur = reduce ? 0 : (Math.abs(anim.to - anim.from) > 1.5 ? 1600 : 1100);
+    if (!anim.dur) anim.v = anim.to;
+    cur = k;
   }
-  function yForP(k) { return hallTop + k * unit; }
+  function stepAnim(now) {
+    if (!anim.dur) return;
+    var f = clamp((now - anim.t0) / anim.dur, 0, 1);
+    var e = f < 0.5 ? 4 * f * f * f : 1 - Math.pow(-2 * f + 2, 3) / 2;
+    anim.v = anim.from + (anim.to - anim.from) * e;
+    if (f >= 1) { anim.v = anim.to; anim.dur = 0; }
+  }
+  function hallInView() {
+    var top = hall.offsetTop - window.scrollY;
+    return top < vh * 0.45 && top + hall.offsetHeight > vh * 0.55;
+  }
+  function setPlaying(on) {
+    playing = on; elapsed = 0;
+    rail.classList.toggle('stopped', !on);
+    hallLabels();
+  }
+  function stepAuto(now) {
+    var dt = lastT ? Math.min(now - lastT, 100) : 0;
+    lastT = now;
+    var a = document.activeElement;
+    var hold = !playing || lbOpen || document.hidden || anim.dur || ctrlHover || flat[cur].t === 1 ||
+      (a && a !== document.body && hall.contains(a) && a.matches(':focus-visible')) || !hallInView();
+    if (!hold) {
+      elapsed += dt;
+      if (elapsed >= SLIDE_MS) goTo(cur + 1);
+    }
+    var pr = playing ? clamp(elapsed / SLIDE_MS, 0, 1) : 1;
+    var ri = railLinks[cur] && $('i', railLinks[cur]);
+    if (ri) ri.style.setProperty('--prog', pr.toFixed(3));
+  }
 
   function upgrade(stop) {
     $$('img[data-full]', stop).forEach(function (img) {
@@ -261,8 +295,7 @@
   var activeStop = -1, inDocs = false;
   function renderHall() {
     if (!mqDesk.matches) return;
-    var y = window.scrollY;
-    var p = pFromY(y);
+    var p = anim.v;
     scene.mx += (scene.tmx - scene.mx) * 0.07;
     scene.my += (scene.tmy - scene.my) * 0.07;
     var flatKey = '';
@@ -319,11 +352,9 @@
     if (!mqDesk.matches) return;
     var y = window.scrollY;
     var lettersTop = lettersSec.offsetTop, lettersBottom = lettersTop + lettersSec.offsetHeight;
-    var show = y > hall.offsetTop - vh * 0.5 && y < lettersBottom - vh * 0.75;
+    var show = y > hall.offsetTop - vh * 0.5 && y < hall.offsetTop + hall.offsetHeight - vh * 0.4;
     rail.classList.toggle('show', show);
-    var idx;
-    if (y > lettersTop - vh * 0.55) idx = 4;
-    else { var p = pFromY(y); idx = p < 0.5 ? 0 : clamp(Math.round(p - 1), 0, 3); }
+    var idx = cur;
     railLinks.forEach(function (a, i) { a.classList.toggle('on', i === idx); });
   }
 
@@ -348,6 +379,7 @@
     }, { rootMargin: '100px' }).observe(hall);
   }
   function tick() {
+    if (mqDesk.matches) { var now = performance.now(); stepAnim(now); stepAuto(now); }
     if (hallVisible) renderHall();
     updateRail();
   }
@@ -357,10 +389,31 @@
   railLinks.forEach(function (a, i) {
     a.addEventListener('click', function (e) {
       e.preventDefault();
-      if (i === 4) scrollToY(lettersSec.offsetTop - hdrH() + 2);
-      else scrollToY(yForP(i + 1));
+      if (i === 4) { scrollToY(lettersSec.offsetTop - hdrH() + 2); return; }
+      if (!hallInView()) scrollToY(hall.offsetTop);
+      goTo(i);
     });
   });
+  hallCtrl.prev.addEventListener('click', function () { goTo(cur - 1); });
+  hallCtrl.next.addEventListener('click', function () { goTo(cur + 1); });
+  hallCtrl.play.addEventListener('click', function () { setPlaying(!playing); });
+  rail.addEventListener('mouseenter', function () { ctrlHover = true; });
+  rail.addEventListener('mouseleave', function () { ctrlHover = false; });
+  $$('.stop-cap').forEach(function (c) {
+    c.addEventListener('mouseenter', function () { ctrlHover = true; });
+    c.addEventListener('mouseleave', function () { ctrlHover = false; });
+  });
+  hall.addEventListener('keydown', function (e) {
+    if (!mqDesk.matches || e.target.closest('#deck')) return;
+    if (e.key === 'ArrowRight') { goTo(cur + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { goTo(cur - 1); e.preventDefault(); }
+  });
+  function hallLabels() {
+    hallCtrl.prev.setAttribute('aria-label', plain(t('ui.docprev', 'Предыдущий документ')));
+    hallCtrl.next.setAttribute('aria-label', plain(t('ui.docnext', 'Следующий документ')));
+    hallCtrl.play.setAttribute('aria-label', playing ? plain(t('ui.pause', 'Пауза')) : plain(t('ui.play', 'Листать автоматически')));
+  }
+  setPlaying(playing);
 
   /* ============ КОЛОДА СЕРТИФИКАТОВ ============ */
   var deck = $('#deck'), deckCur = 0, deckSheets = [];
@@ -428,6 +481,7 @@
     $('#deckNext').disabled = deckCur === CERTS.length - 1;
   }
   function setDeck(n) {
+    elapsed = 0;
     n = clamp(n, 0, CERTS.length - 1);
     if (n === deckCur) return;
     deckCur = n; hideLoupe(); layoutDeck(); renderDeckCap();
@@ -727,7 +781,7 @@
 
   function anchorY(id) {
     if (id === 'top') return 0;
-    if (id === 'dokumenty' && mqDesk.matches) return yForP(1);
+    if (id === 'dokumenty' && mqDesk.matches) return hall.offsetTop;
     var el = document.getElementById(id);
     if (!el) return null;
     var y = el.getBoundingClientRect().top + window.scrollY - hdrH();
@@ -753,7 +807,7 @@
   function updateNav() {
     var y = window.scrollY + hdrH() + vh * 0.3, cur = -1, best = -1;
     navTargets.forEach(function (id, i) {
-      var ty = id === 'dokumenty' && mqDesk.matches ? yForP(0.5) : (function () { var el = document.getElementById(id); return el ? el.getBoundingClientRect().top + window.scrollY : 1e9; })();
+      var ty = id === 'dokumenty' && mqDesk.matches ? hall.offsetTop - vh * 0.3 : (function () { var el = document.getElementById(id); return el ? el.getBoundingClientRect().top + window.scrollY : 1e9; })();
       if (ty <= y && ty > best) { best = ty; cur = i; }
     });
     navLinks.forEach(function (a, i) { a.classList.toggle('on', i === cur); });
@@ -1021,7 +1075,7 @@
       e.preventDefault();
       var k = +a.getAttribute('data-goto');
       if (k === 4) { scrollToY(lettersSec.offsetTop - hdrH() + 2); return; }
-      if (mqDesk.matches) { scrollToY(yForP(k + 1)); return; }
+      if (mqDesk.matches) { scrollToY(hall.offsetTop); goTo(k); return; }
       var st = stops[k]; if (st) scrollToY(st.getBoundingClientRect().top + window.scrollY - hdrH() - 8);
     });
   });

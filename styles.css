@@ -159,7 +159,7 @@ html.lenis,html.lenis body{height:auto}
 
 /* --- настольная сцена --- */
 @media (min-width:961px){
-  .hall{height:calc(100vh + 4.5*var(--unit,85vh))}
+  .hall{height:max(100vh,560px)}
   .hall-pin{position:sticky;top:0;height:100vh;min-height:560px}
   .hall-head{position:absolute;left:var(--colL);bottom:50%;width:min(35vw,620px);z-index:5;opacity:0;visibility:hidden;transform:translateY(24px);transition:opacity var(--t2) var(--ease),transform .6s var(--ease),visibility 0s linear var(--t2)}
   .hall.in-docs .hall-head{opacity:1;visibility:visible;transform:none;transition-delay:.1s,.1s,0s}
@@ -189,6 +189,16 @@ html.lenis,html.lenis body{height:auto}
   .rail a:hover{color:#fff}
   .rail a.on{color:#fff;font-weight:600}
   .rail a.on i{width:52px;height:2px}
+  .rail a i{position:relative}
+  .rail a.on[data-rail="0"] i,.rail a.on[data-rail="1"] i,.rail a.on[data-rail="2"] i,.rail a.on[data-rail="3"] i{background:rgba(255,255,255,.28)}
+  .rail a i::after{content:"";position:absolute;inset:0;background:#fff;transform-origin:left center;transform:scaleX(0)}
+  .rail a.on i::after{transform:scaleX(var(--prog,0))}
+  .rail-ctrl{display:flex;gap:8px;margin-bottom:8px}
+  .rail-ctrl .arr{width:40px;height:40px;background:rgba(4,18,48,.55)}
+  .rail-ctrl .arr:hover{background:rgba(110,162,240,.22)}
+  .hall-play .i-play{display:none}
+  .rail.stopped .hall-play .i-play{display:block}
+  .rail.stopped .hall-play .i-pause{display:none}
   .hall-hint{display:flex;align-items:center;gap:10px;position:absolute;left:var(--colL);bottom:4.4vh;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sky);opacity:0;transition:opacity var(--t2) var(--ease)}
   .hall.in-docs .hall-hint{opacity:.9;transition-delay:.4s}
 }
