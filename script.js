@@ -204,7 +204,7 @@
   var rail = $('#rail'), railLinks = $$('#rail a');
   var lettersSec = $('#pisma');
   var anchorDocs = $('#dokumenty');
-  var vw = 1440, vh = 900;
+  var vw = 1440, vh = 900, hallY = 0, hallH = 900;
   var LAST = stops.length;          /* остановок в сцене: p = 1..LAST */
   var scene = { intro: reduce ? 0 : 1, mx: 0, my: 0, tmx: 0, tmy: 0 };
   var flat = stops.map(function () { return { v: 0, t: 0 }; });
@@ -213,6 +213,8 @@
 
   function layoutHall() {
     vw = window.innerWidth; vh = window.innerHeight;
+    hall.style.height = '';
+    hallY = hall.offsetTop; hallH = hall.offsetHeight;
     if (mqDesk.matches) {
       hall.style.height = '';
       anchorDocs.style.top = hdrH() + 'px';
@@ -249,8 +251,8 @@
     if (f >= 1) { anim.v = anim.to; anim.dur = 0; }
   }
   function hallInView() {
-    var top = hall.offsetTop - window.scrollY;
-    return top < vh * 0.45 && top + hall.offsetHeight > vh * 0.55;
+    var top = hallY - window.scrollY;
+    return top < vh * 0.45 && top + hallH > vh * 0.55;
   }
   function setPlaying(on) {
     playing = on; elapsed = 0;
@@ -268,7 +270,7 @@
       if (elapsed >= SLIDE_MS) goTo(cur + 1);
     }
     var pr = playing ? clamp(elapsed / SLIDE_MS, 0, 1) : 1;
-    var ri = railLinks[cur] && $('i', railLinks[cur]);
+    var ri = railShown && railLinks[cur] && $('i', railLinks[cur]);
     if (ri) ri.style.setProperty('--prog', pr.toFixed(3));
   }
 
@@ -348,14 +350,13 @@
     }
   }
 
+  var railShown = null, railOn = -1;
   function updateRail() {
     if (!mqDesk.matches) return;
     var y = window.scrollY;
-    var lettersTop = lettersSec.offsetTop, lettersBottom = lettersTop + lettersSec.offsetHeight;
-    var show = y > hall.offsetTop - vh * 0.5 && y < hall.offsetTop + hall.offsetHeight - vh * 0.4;
-    rail.classList.toggle('show', show);
-    var idx = cur;
-    railLinks.forEach(function (a, i) { a.classList.toggle('on', i === idx); });
+    var show = y > hallY - vh * 0.5 && y < hallY + hallH - vh * 0.4;
+    if (show !== railShown) { railShown = show; rail.classList.toggle('show', show); }
+    if (railOn !== cur) { railOn = cur; railLinks.forEach(function (a, i) { a.classList.toggle('on', i === cur); }); }
   }
 
   if (pin) {
@@ -804,13 +805,28 @@
 
   var navLinks = $$('.nav a');
   var navTargets = navLinks.map(function (a) { return a.getAttribute('href').slice(1); });
-  function updateNav() {
-    var y = window.scrollY + hdrH() + vh * 0.3, cur = -1, best = -1;
-    navTargets.forEach(function (id, i) {
-      var ty = id === 'dokumenty' && mqDesk.matches ? hall.offsetTop - vh * 0.3 : (function () { var el = document.getElementById(id); return el ? el.getBoundingClientRect().top + window.scrollY : 1e9; })();
-      if (ty <= y && ty > best) { best = ty; cur = i; }
+  /* позиции целей меню: замер при смене раскладки */
+  var navY = [], navHdr = 76, navOn = -2;
+  function measureNav() {
+    navHdr = hdrH();
+    navY = navTargets.map(function (id) {
+      if (id === 'dokumenty' && mqDesk.matches) return hall.offsetTop - vh * 0.3;
+      var el = document.getElementById(id); return el ? el.getBoundingClientRect().top + window.scrollY : 1e9;
     });
+  }
+  function updateNav() {
+    var y = window.scrollY + navHdr + vh * 0.3, cur = -1, best = -1;
+    navY.forEach(function (ty, i) { if (ty <= y && ty > best) { best = ty; cur = i; } });
+    if (cur === navOn) return;
+    navOn = cur;
     navLinks.forEach(function (a, i) { a.classList.toggle('on', i === cur); });
+  }
+  if ('ResizeObserver' in window) {
+    var roT = 0;
+    new ResizeObserver(function () {
+      clearTimeout(roT);
+      roT = setTimeout(function () { hallY = hall.offsetTop; hallH = hall.offsetHeight; measureNav(); updateNav(); }, 200);
+    }).observe(document.body);
   }
   var navT = 0;
   window.addEventListener('scroll', function () { if (!navT) navT = setTimeout(function () { navT = 0; updateNav(); }, 120); }, { passive: true });
@@ -911,11 +927,11 @@
     });
 
     /* шаги: линия идёт за прокруткой */
-    var sl = $('.step-list'), stepEls = $$('.step');
+    var sl = $('.step-list'), stepEls = $$('.step'), stepLine = $('.step-track i');
     ScrollTrigger.create({
       trigger: sl, start: 'top 80%', end: 'bottom 60%', scrub: 0.6,
       onUpdate: function (st) {
-        sl.style.setProperty('--prog', st.progress.toFixed(3));
+        stepLine.style.transform = (mqDesk.matches ? 'scaleX(' : 'scaleY(') + st.progress.toFixed(3) + ')';
         stepEls.forEach(function (s, i) { s.classList.toggle('done', st.progress > i / stepEls.length + 0.04); });
       }
     });
@@ -1086,7 +1102,7 @@
   renderDeckCap();
   renderLetter(0, false);
   if (!hasGsap || reduce) scene.intro = 0;
-  renderHall(); updateRail(); updateNav();
+  renderHall(); updateRail(); measureNav(); updateNav();
   var started = false;
   function start() {
     if (started) return; started = true;
@@ -1102,12 +1118,12 @@
     rt = setTimeout(function () {
       var w = window.innerWidth;
       if (w === rw && !mqDesk.matches) return;   /* на телефоне адресная строка меняет только высоту */
-      rw = w; layoutHall(); renderHall();
+      rw = w; layoutHall(); measureNav(); renderHall();
       if (hasGsap) ScrollTrigger.refresh();
     }, 150);
   });
   window.addEventListener('load', function () {
-    layoutHall(); if (hasGsap) ScrollTrigger.refresh();
+    layoutHall(); measureNav(); if (hasGsap) ScrollTrigger.refresh();
     if (location.hash.length > 1) { var y = anchorY(location.hash.slice(1)); if (y != null) scrollToY(y, true); }
   });
 
