@@ -1,7 +1,7 @@
 /* English text. Keys match data-i18n values in index.html. */
 window.SITE_EN = {
   "meta.title": "Audit and accounting services in Uralsk - Balance Audit LLP",
-  "meta.desc": "Financial statement audit from 1 000 000 KZT, accounting support from 150 000 KZT, consultation 5 000 KZT. Licence No. 20005100, member of the Union of Auditors of Kazakhstan. We work across Kazakhstan.",
+  "meta.desc": "Financial statement audit from 1 000 000 KZT, accounting support from 100 000 KZT, consultation 5 000 KZT. Licence No. 20005100, member of the Union of Auditors of Kazakhstan. We work across Kazakhstan.",
   "nav.docs": "Documents",
   "nav.prices": "Prices",
   "nav.audit": "Audit",
