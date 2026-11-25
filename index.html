@@ -3,6 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- Google tag (gtm.js) -->
+<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-TNFZ6VXD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  /* Конверсия: Интерактивные номера телефонов (клик по tel:) */
+  function gtag_report_conversion(url) {
+    var callback = function () {
+      if (typeof(url) != 'undefined') { window.location = url; }
+    };
+    gtag('event', 'conversion', {
+      'send_to': 'AW-18595091113/_2eOCLGnm78dEKml6qJF',
+      'value': 1.0,
+      'currency': 'USD',
+      'event_callback': callback
+    });
+    return false;
+  }
+
+  /* Конверсия: Контакт (клик по WhatsApp) */
+  function gtag_report_contact() {
+    gtag('event', 'conversion', {
+      'send_to': 'AW-18595091113/MX9JCPapm78dEKml6qJF',
+      'value': 1.0,
+      'currency': 'USD'
+    });
+  }
+
+  /* Конверсия: Отправка формы для потенциальных клиентов */
+  function gtag_report_lead_form() {
+    gtag('event', 'conversion', {
+      'send_to': 'AW-18595091113/MgUVCLrNlr8dEKml6qJF',
+      'value': 1.0,
+      'currency': 'USD'
+    });
+  }
+</script>
 <meta name="format-detection" content="telephone=no">
 <title data-i18n="meta.title">Аудит и бухгалтерские услуги в Уральске - ТОО «Баланс Аудит»</title>
 <meta name="description" content="Аудит финансовой отчётности от 1 000 000 тг, бухгалтерское сопровождение от 100 000 тг, консультация 5 000 тг. Лицензия № 20005100, членство в Союзе аудиторов Казахстана. Работаем по всему Казахстану.">
@@ -77,7 +117,7 @@
   }
 }
 </script>
-<link rel="stylesheet" href="styles.css?v=20261124-1">
+<link rel="stylesheet" href="styles.css?v=20261125-1">
 <script src="https://lead-bot.sultan-askarov-kz.workers.dev/t.js" data-site="balansaudit" defer></script>
 </head>
 <body>
@@ -631,6 +671,6 @@
 <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
 <script src="assets/vendor/SplitText.min.js" defer></script>
 <script src="assets/vendor/lenis.min.js" defer></script>
-<script src="script.js?v=20261124-1" defer></script>
+<script src="script.js?v=20261125-1" defer></script>
 </body>
 </html>

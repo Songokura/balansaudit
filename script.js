@@ -852,8 +852,21 @@
     ];
     var c = form.elements.comment.value.trim();
     if (c) lines.push(plain(t('f.comment')) + ': ' + c);
+    if (typeof gtag_report_lead_form === 'function') { try { gtag_report_lead_form(); } catch (err) {} }
     window.open(WA + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
     $('#formOk').hidden = false;
+  });
+
+  /* клики tel / WhatsApp -> конверсии Google Ads; без preventDefault:
+     tel: не выгружает страницу, wa.me открывается в новой вкладке */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="tel:"], a[href*="wa.me"]');
+    if (!a || typeof gtag !== 'function') return;
+    if (a.getAttribute('href').indexOf('tel:') === 0) {
+      gtag('event', 'conversion', { 'send_to': 'AW-18595091113/_2eOCLGnm78dEKml6qJF', 'value': 1.0, 'currency': 'USD' });
+    } else if (typeof gtag_report_contact === 'function') {
+      gtag_report_contact();
+    }
   });
   form.addEventListener('input', function (e) { var f = e.target.closest('.fld'); if (f) f.classList.remove('err'); });
 
